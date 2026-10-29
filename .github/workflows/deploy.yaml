@@ -1,0 +1,101 @@
+name: Deploy blog
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Validate the full artifact pipeline without publishing
+        type: boolean
+        default: true
+permissions:
+  contents: read
+concurrency:
+  group: production
+  cancel-in-progress: false
+jobs:
+  publication:
+    if: github.ref == 'refs/heads/main' && (inputs.dry_run == true || (vars.CLOUDFLARE_DEPLOY_ENABLED == 'true' && github.event.repository.is_template != true))
+    name: Prepare publication
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: make check
+      - name: Generate domain configuration and check deployment
+        env:
+          WORKER_NAME: ${{ vars.CLOUDFLARE_WORKER_NAME }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          options=()
+          if [ "$DRY_RUN" = 'true' ]; then
+            options+=(-allow-placeholder)
+            WORKER_NAME="${WORKER_NAME:-gazeta-check}"
+          fi
+          go run ./internal/deployconfig -worker "$WORKER_NAME" -out .build/wrangler.json "${options[@]}"
+          npx --no-install wrangler deploy --config .build/wrangler.json --dry-run --outdir .build/wrangler-output
+      - uses: actions/upload-artifact@v4
+        id: upload
+        with:
+          name: publication-${{ github.sha }}
+          path: |
+            public/
+            .build/wrangler.json
+          include-hidden-files: true
+          if-no-files-found: error
+  deploy:
+    name: Publish validated artifact
+    needs: publication
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ needs.publication.outputs.artifact }}
+          merge-multiple: true
+          path: .
+      - name: Validate downloaded deployment artifact
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: npx --no-install wrangler deploy --config .build/wrangler.json --dry-run --outdir .build/downloaded-output
+      - name: Check whether this is still current main
+        id: current
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          head=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)
+          if [ "$head" = "$GITHUB_SHA" ]; then
+            echo 'publish=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'publish=false' >> "$GITHUB_OUTPUT"
+            echo 'A newer main commit exists; this publication is skipped.'
+          fi
+      - name: Deploy exact publication
+        if: inputs.dry_run != true && steps.current.outputs.publish == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Configure CLOUDFLARE_API_TOKEN.' >&2; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Configure CLOUDFLARE_ACCOUNT_ID.' >&2; exit 1; }
+          npx --no-install wrangler deploy --config .build/wrangler.json
