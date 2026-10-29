@@ -1,0 +1,27 @@
+version: 1
+home_limit: 6
+unsafe_html: false
+authors:
+  Seu Nome:
+    url: /about/
+page_types:
+  /about/: ProfilePage
+labels:
+  articles: Artigos
+  blog: Artigos
+  tags: Assuntos
+  categories: Categorias
+  categories_body: Encontre publicações por [assunto](/tags/).
+  not_found: Página não encontrada
+  not_found_body: Este endereço não existe. [Voltar ao início](/).
+  all_articles: Ver todos os artigos
+  series: Série
+  part: Parte
+  series_index: Partes desta série
+  continue_series: Continuar leitura
+  start_series: Começar série
+  start_first: Ler primeira parte
+  previous: Anterior
+  next: Próximo
+  redirecting: Redirecionando
+  open_article: Ler artigo

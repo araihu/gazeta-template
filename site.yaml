@@ -1,0 +1,39 @@
+version: 1
+source: .build/content
+output: public
+assets: local
+offline: true
+site:
+  name: Meu blog
+  description: Ideias e experiências para compartilhar.
+  base_url: https://blog.example
+  home: index.md
+  logo: assets/logo.svg
+  icon: assets/mark.svg
+  social_image:
+    path: assets/social.png
+    alt: Um caderno aberto sobre um fundo azul.
+locales:
+  default: pt-BR
+  supported: [pt-BR]
+publication:
+  date_format: 02/01/2006
+layout:
+  kind: docs
+  default: {sidebar: false, toc: false, pagination: false}
+navigation:
+  links:
+    - {label: Artigos, href: /blogs/}
+    - {label: Sobre, href: /about/}
+  footer_links:
+    - {label: RSS, href: /index.xml}
+search:
+  label: Buscar artigos
+  placeholder: Buscar artigos
+theme:
+  builtin: true
+  name: modern
+  color_mode: system
+  allow_switch_theme: true
+custom_css:
+  - css_url: assets/theme.css
