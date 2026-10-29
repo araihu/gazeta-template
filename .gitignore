@@ -1,0 +1,9 @@
+public/
+public.previous/
+.build/
+.wrangler/
+node_modules/
+.env
+.env.*
+.dev.vars*
+.DS_Store
