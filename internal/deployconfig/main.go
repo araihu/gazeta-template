@@ -66,7 +66,15 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	relative, err := filepath.Rel(filepath.Dir(*output), "public")
+	public, err := filepath.Abs("public")
+	if err != nil {
+		return err
+	}
+	outputDirectory, err := filepath.Abs(filepath.Dir(*output))
+	if err != nil {
+		return err
+	}
+	relative, err := filepath.Rel(outputDirectory, public)
 	if err != nil {
 		return err
 	}
