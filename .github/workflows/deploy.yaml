@@ -32,7 +32,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - run: make check
+      - name: Validate publication and structured data
+        run: make check
       - name: Generate domain configuration and check deployment
         env:
           WORKER_NAME: ${{ vars.CLOUDFLARE_WORKER_NAME }}

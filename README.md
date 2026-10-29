@@ -45,7 +45,7 @@ O template não define essas variáveis nem inclui credenciais. O deploy automá
 
 ### Fluxo
 
-- **Pull request:** build e validação da Gazeta, testes de configuração/identidade, `go vet`, dry-run do Wrangler e artifact com o site gerado. Nenhum secret de deploy é usado.
+- **Pull request:** build e validação da Gazeta, testes de configuração e JSON-LD entre identidades, `go vet`, dry-run do Wrangler e artifact com o site gerado. Nenhum secret de deploy é usado.
 - **Push em `main`:** com deploy habilitado, outro workflow prepara e valida a publicação. Um segundo job baixa o artifact daquela execução e publica esses mesmos arquivos, sem reconstruir o site com as credenciais de produção.
 - **Execução manual:** em Actions > Deploy blog > Run workflow, mantenha `dry_run = true` para testar o pipeline completo sem publicar. Esse modo funciona até no template, sem conta ou token. Para publicar manualmente, use `main`, configure as variáveis acima e desmarque `dry_run`.
 
@@ -63,7 +63,24 @@ make run            # Preview em http://127.0.0.1:1313
 
 Refaça o build após editar. Node/Wrangler só são necessários para o empacotamento e deploy; `make build` e o preview usam Go/Gazeta.
 
-`make check` também constrói uma segunda identidade em diretório temporário para conferir domínio, autor, perfil e tema independentes. `scripts/check.sh` contém as verificações Go que podem ser executadas novamente pelo revisor.
+### Contrato dos dados estruturados
+
+`make check` executa a suíte de `internal/schema` sem cache de resultados, tanto no CI dos PRs quanto antes do deploy. Ela constrói três identidades sucessivas no mesmo diretório temporário, com domínios, autores, caminhos de perfil e temas diferentes. As fixtures são independentes do conteúdo inicial: você pode remover o post de exemplo sem reescrever os testes.
+
+A suíte lê o HTML final, decodifica o JSON-LD e confere:
+
+- `WebSite`, página inicial, `BlogPosting`, `ProfilePage`/`Person` e listas de artigos com URLs, IDs e canonical da identidade atual.
+- Autoria individual ou múltipla, perfil local ou externo e convidado sem URL. O perfil precisa corresponder à pessoa configurada.
+- Datas da publicação e edição, artigo com e sem capa e correspondência da capa com Open Graph/Twitter. Logo e preview global não viram imagem de artigo ou pessoa.
+- Um único bloco JSON-LD no head de cada página comum, nenhum na 404 e nenhuma identidade anterior nos valores JSON, inclusive texto escapado.
+
+O teste também adultera oito resultados válidos para provar que o contrato rejeita regressões. Para executar só essa suíte:
+
+```sh
+GOWORK=off go test ./internal/schema -count=1 -v
+```
+
+Essa validação local verifica o contrato da publicação, sem chamar serviços do Google no CI. Após um deploy real, valide as URLs no [Rich Results Test](https://search.google.com/test/rich-results) e no [Schema.org Validator](https://validator.schema.org/). As regras de elegibilidade estão na documentação de [Article](https://developers.google.com/search/docs/appearance/structured-data/article), [ProfilePage](https://developers.google.com/search/docs/appearance/structured-data/profile-page) e [nome do site](https://developers.google.com/search/docs/appearance/site-names).
 
 ## Publicar conteúdo
 

@@ -7,6 +7,9 @@ tool github.com/araihu/gazeta/cmd/gazeta
 require (
 	github.com/araihu/gazeta v0.0.2
 	github.com/araihu/margo v0.0.29
+	github.com/pelletier/go-toml/v2 v2.4.3
+	go.yaml.in/yaml/v3 v3.0.5
+	golang.org/x/net v0.59.0
 )
 
 require (
@@ -28,12 +31,9 @@ require (
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.4.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
-	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
 	github.com/yuin/goldmark v1.8.2 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/image v0.46.0 // indirect
-	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
