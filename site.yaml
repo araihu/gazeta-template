@@ -8,7 +8,7 @@ site:
   description: Ideias e experiências para compartilhar.
   base_url: https://blog.example
   home: index.md
-  logo: assets/mark.svg
+  logo: assets/logo.svg
   icon: assets/mark.svg
   social_image:
     path: assets/social.png

@@ -20,7 +20,7 @@ A engine é uma ferramenta Go versionada em `go.mod`. Este repositório contém 
 | Conteúdo da bio e autoria de cada artigo | `content/about/` e frontmatter dos posts |
 | Tema, modo claro/escuro e alternância | `site.yaml`, campo `theme` |
 | Paleta e disposição das listas | `assets/theme.css` |
-| Ícone/logo e preview social de 1280×640 | `assets/mark.svg` e `assets/social.png`, referenciados em `site.yaml` |
+| Ícone/logo e preview social de 1280×640 | `assets/logo.svg`, `assets/mark.svg` e `assets/social.png`, referenciados em `site.yaml` |
 
 Troque `https://blog.example` pelo domínio real, sem subdiretório. O deploy deriva o Custom Domain desse mesmo campo; não há outra cópia do domínio para sincronizar. Substitua `Seu Nome` tanto no cadastro de autores quanto na bio e no frontmatter do artigo. Autores convidados podem ter seus próprios perfis e páginas.
 
