@@ -1,6 +1,6 @@
 # Gazeta blog template
 
-A Git-managed blog using [Gazeta v0.0.2](https://github.com/araihu/gazeta/releases/tag/v0.0.2), native Margo configuration and Cloudflare Workers Static Assets.
+A Git-managed blog using [Gazeta v0.0.3](https://github.com/araihu/gazeta/releases/tag/v0.0.3), native Margo configuration and Cloudflare Workers Static Assets.
 
 The engine is a Go tool pinned in `go.mod`. This repository contains configuration, sample content, original assets and a small adapter between the site's identity and deployment. There is no engine copy to maintain.
 
@@ -48,6 +48,8 @@ This template does not set those variables or include credentials. Automatic dep
 - **Pull request:** Gazeta build and validation, configuration and cross-identity JSON-LD tests, `go vet`, Wrangler dry-run and an artifact containing the generated site. No deployment secrets are used.
 - **Push to `main`:** when deployment is enabled, a separate workflow prepares and validates the publication. A second job downloads that run's artifact and publishes those exact files, without rebuilding the site with production credentials.
 - **Manual run:** in Actions > Deploy blog > Run workflow, keep `dry_run = true` to test the complete pipeline without publishing. This works in the template itself, without an account or token. To publish manually, select `main`, configure the variables above and clear `dry_run`.
+
+After a real deployment, Gazeta verifies the public origin against the downloaded artifact without rebuilding. It checks Margo manifest identity, HTML/JSON-LD/canonical metadata, asset bytes and MIME types, legacy HTTP redirects and missing-page status. A three-minute propagation deadline bounds retries. Failure makes the deployment job fail; `production-verification-<commit>` preserves the JSON receipt. Run `make verify` against an existing local `public/` directory to repeat this check. The verifier does not replace Google's external Rich Results Test.
 
 Deployments run serially. Before publishing, the workflow checks that its commit is still the current `main`; an older run cannot replace a newer publication. Only the real deployment step receives the Cloudflare token. Do not run another automatic deployment pipeline for the same Worker at the same time.
 
