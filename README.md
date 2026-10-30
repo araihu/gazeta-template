@@ -1,114 +1,118 @@
 # Gazeta blog template
 
-Um blog mantido em Git, com [Gazeta v0.0.2](https://github.com/araihu/gazeta/releases/tag/v0.0.2), configuração nativa do Margo e publicação no Cloudflare Workers Static Assets.
+A Git-managed blog using [Gazeta v0.0.2](https://github.com/araihu/gazeta/releases/tag/v0.0.2), native Margo configuration and Cloudflare Workers Static Assets.
 
-A engine é uma ferramenta Go versionada em `go.mod`. Este repositório contém configuração, conteúdo de exemplo, assets originais e uma pequena ligação entre a identidade do site e o deploy. Não é preciso manter uma cópia da engine.
+The engine is a Go tool pinned in `go.mod`. This repository contains configuration, sample content, original assets and a small adapter between the site's identity and deployment. There is no engine copy to maintain.
 
-## Criar seu blog
+## Create your blog
 
-1. Clique em **Use this template > Create a new repository**. Inclua a branch `main`.
-2. Clone o novo repositório. Requisitos locais: Go 1.27.3+, Node.js 24+ e Make.
-3. Edite os arquivos abaixo e substitua o conteúdo de exemplo.
-4. Execute `npm ci` e `make check dry-run`. Abra um PR para revisar a primeira publicação.
-5. Configure as credenciais do seu próprio destino e habilite o deploy conforme a seção seguinte.
+1. Select **Use this template > Create a new repository**. Include the `main` branch.
+2. Clone your new repository. Local requirements are Go 1.27.3+, Node.js 24+ and Make.
+3. Edit the files below and replace the sample content.
+4. Run `npm ci` and `make check dry-run`. Open a PR to review the first publication.
+5. Configure your own deployment credentials and enable deployment as described below.
 
-| Configuração | Arquivo |
+| Setting | File |
 | --- | --- |
-| Nome, descrição e domínio canônico | `site.yaml`, campos `site.*` |
-| Autores e destinos dos perfis | `blog.yaml`, campo `authors` |
-| Tipo de página do autor | `blog.yaml`, campo `page_types` |
-| Conteúdo da bio e autoria de cada artigo | `content/about/` e frontmatter dos posts |
-| Tema, modo claro/escuro e alternância | `site.yaml`, campo `theme` |
-| Paleta e disposição das listas | `assets/theme.css` |
-| Ícone/logo e preview social de 1280×640 | `assets/logo.svg`, `assets/mark.svg` e `assets/social.png`, referenciados em `site.yaml` |
+| Name, description and canonical domain | `site.yaml`, `site.*` fields |
+| Authors and profile destinations | `blog.yaml`, `authors` field |
+| Author page type | `blog.yaml`, `page_types` field |
+| Biography and article authorship | `content/about/` and post frontmatter |
+| Theme, light/dark mode and theme toggle | `site.yaml`, `theme` field |
+| Palette and listing layout | `assets/theme.css` |
+| Logo, icon and 1280x640 social preview | `assets/logo.svg`, `assets/mark.svg` and `assets/social.png`, referenced in `site.yaml` |
 
-Troque `https://blog.example` pelo domínio real, sem subdiretório. O deploy deriva o Custom Domain desse mesmo campo; não há outra cópia do domínio para sincronizar. Substitua `Seu Nome` tanto no cadastro de autores quanto na bio e no frontmatter do artigo. Autores convidados podem ter seus próprios perfis e páginas.
+Replace `https://blog.example` with your real domain, without a subdirectory. Deployment derives the Custom Domain from that same field, so there is no second domain value to synchronize. Replace `Seu Nome` in the author registry, biography and article frontmatter. Guest authors can have their own profiles and pages.
 
-O tema usa os tokens públicos do Margo/Goshtoso. As classes editoriais `.blog-*` vêm da Gazeta. Trocar cores, logo ou layout CSS não exige modificar Go. A Gazeta suporta um idioma por blog; ajuste `locales` e os textos editoriais de `blog.yaml` se mudar de idioma.
+The theme uses public Margo/Goshtoso tokens. Gazeta supplies the editorial `.blog-*` classes. Changing colors, logos or CSS layout does not require Go changes. Gazeta supports one language per blog. If you change the language, update `locales` and the editorial labels in `blog.yaml`.
 
-## Configurar CI/CD
+## Configure CI/CD
 
-O destino é um Worker que serve `public/` como Static Assets, com URLs de diretório e página 404. O domínio precisa estar em uma zona ativa da sua conta Cloudflare e disponível para ser associado ao Worker como Custom Domain.
+The destination is a Worker serving `public/` as Static Assets, with directory URLs and a custom 404 page. The domain must belong to an active zone in your Cloudflare account and be available to attach to the Worker as a Custom Domain.
 
-Em **Settings > Secrets and variables > Actions** do novo repositório, configure:
+In your new repository's **Settings > Secrets and variables > Actions**, configure:
 
-| Tipo | Nome | Valor |
+| Type | Name | Value |
 | --- | --- | --- |
-| Variable | `CLOUDFLARE_ACCOUNT_ID` | ID da conta que hospedará este blog |
-| Variable | `CLOUDFLARE_WORKER_NAME` | Nome exclusivo do Worker, como `meu-blog` |
-| Variable | `CLOUDFLARE_DEPLOY_ENABLED` | `true`, após configurar domínio e credenciais |
-| Secret | `CLOUDFLARE_API_TOKEN` | Token Cloudflare para editar Workers e associar o domínio na conta/zona escolhida |
+| Variable | `CLOUDFLARE_ACCOUNT_ID` | ID of the account hosting this blog |
+| Variable | `CLOUDFLARE_WORKER_NAME` | Unique Worker name, such as `my-blog` |
+| Variable | `CLOUDFLARE_DEPLOY_ENABLED` | `true`, after configuring the domain and credentials |
+| Secret | `CLOUDFLARE_API_TOKEN` | Cloudflare token allowed to edit Workers and attach the domain in the selected account/zone |
 
-Use um token com o modelo **Edit Cloudflare Workers**, limitado à conta e zona deste blog. Veja as instruções oficiais de [Cloudflare com GitHub Actions](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/) e [secrets no GitHub](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets). Não coloque o token em arquivos ou comandos versionados.
+Use the **Edit Cloudflare Workers** token template, restricted to this blog's account and zone. Follow the official [Cloudflare GitHub Actions instructions](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/) and [GitHub secrets documentation](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets). Never put the token in tracked files or commands.
 
-O template não define essas variáveis nem inclui credenciais. O deploy automático fica desabilitado até a configuração do novo repositório. O gerador também recusa domínios de exemplo na publicação real.
+This template does not set those variables or include credentials. Automatic deployment stays disabled until the new repository is configured. The deployment generator also rejects placeholder domains for real publication.
 
-### Fluxo
+### Workflow
 
-- **Pull request:** build e validação da Gazeta, testes de configuração e JSON-LD entre identidades, `go vet`, dry-run do Wrangler e artifact com o site gerado. Nenhum secret de deploy é usado.
-- **Push em `main`:** com deploy habilitado, outro workflow prepara e valida a publicação. Um segundo job baixa o artifact daquela execução e publica esses mesmos arquivos, sem reconstruir o site com as credenciais de produção.
-- **Execução manual:** em Actions > Deploy blog > Run workflow, mantenha `dry_run = true` para testar o pipeline completo sem publicar. Esse modo funciona até no template, sem conta ou token. Para publicar manualmente, use `main`, configure as variáveis acima e desmarque `dry_run`.
+- **Pull request:** Gazeta build and validation, configuration and cross-identity JSON-LD tests, `go vet`, Wrangler dry-run and an artifact containing the generated site. No deployment secrets are used.
+- **Push to `main`:** when deployment is enabled, a separate workflow prepares and validates the publication. A second job downloads that run's artifact and publishes those exact files, without rebuilding the site with production credentials.
+- **Manual run:** in Actions > Deploy blog > Run workflow, keep `dry_run = true` to test the complete pipeline without publishing. This works in the template itself, without an account or token. To publish manually, select `main`, configure the variables above and clear `dry_run`.
 
-Deploys são serializados. Antes de publicar, o workflow confirma que o commit ainda é o `main` atual; uma execução antiga não substitui uma publicação mais recente. O token Cloudflare só é disponibilizado à etapa de deploy real. Não use simultaneamente outro pipeline de publicação automática para o mesmo Worker.
+Deployments run serially. Before publishing, the workflow checks that its commit is still the current `main`; an older run cannot replace a newer publication. Only the real deployment step receives the Cloudflare token. Do not run another automatic deployment pipeline for the same Worker at the same time.
 
-O Wrangler fica fixado em `package-lock.json`. `.build/wrangler.json` é gerado da configuração do site e não deve ser editado ou commitado. O pipeline gera também um dry-run a partir do artifact baixado, para conferir que os caminhos continuam válidos entre jobs.
+Wrangler is pinned in `package-lock.json`. `.build/wrangler.json` is generated from the site configuration and must not be edited or committed. The pipeline also runs a dry-run against the downloaded artifact to verify paths between jobs.
 
-## Desenvolvimento
+## Development
 
 ```sh
 npm ci
-make check dry-run  # Gera, valida, testa e empacota sem publicar
-make run            # Preview em http://127.0.0.1:1313
+make check dry-run  # Build, validate, test and package without publishing
+make run            # Preview at http://127.0.0.1:1313
 ```
 
-Refaça o build após editar. Node/Wrangler só são necessários para o empacotamento e deploy; `make build` e o preview usam Go/Gazeta.
+Rebuild after editing. Node/Wrangler are needed only for packaging and deployment; `make build` and the preview use Go/Gazeta.
 
-### Contrato dos dados estruturados
+### Structured data contract
 
-`make check` executa a suíte de `internal/schema` sem cache de resultados, tanto no CI dos PRs quanto antes do deploy. Ela constrói três identidades sucessivas no mesmo diretório temporário, com domínios, autores, caminhos de perfil e temas diferentes. As fixtures são independentes do conteúdo inicial: você pode remover o post de exemplo sem reescrever os testes.
+`make check` runs the `internal/schema` suite without cached test results, both in PR CI and before deployment. It builds three successive identities in the same temporary directory, with different domains, authors, profile paths and themes. Fixtures are independent of the starter content, so you can remove the sample post without rewriting the tests.
 
-A suíte lê o HTML final, decodifica o JSON-LD e confere:
+The suite reads the final HTML, decodes JSON-LD and checks:
 
-- `WebSite`, página inicial, `BlogPosting`, `ProfilePage`/`Person` e listas de artigos com URLs, IDs e canonical da identidade atual.
-- Autoria individual ou múltipla, perfil local ou externo e convidado sem URL. O perfil precisa corresponder à pessoa configurada.
-- Datas da publicação e edição, artigo com e sem capa e correspondência da capa com Open Graph/Twitter. Logo e preview global não viram imagem de artigo ou pessoa.
-- Um único bloco JSON-LD no head de cada página comum, nenhum na 404 e nenhuma identidade anterior nos valores JSON, inclusive texto escapado.
+- `WebSite`, the home page, `BlogPosting`, `ProfilePage`/`Person` and article lists use the current identity's URLs, IDs and canonical links.
+- Single or multiple authors, local or external profiles and a guest without a URL. The profile must match the configured person.
+- Publication and modification dates, articles with and without covers, and matching cover URLs in Open Graph/Twitter metadata. Logos and the global preview do not become article or person images.
+- Exactly one JSON-LD block in the head of each regular page, none on the 404 page, and no previous identity in decoded JSON values, including escaped text.
 
-O teste também adultera oito resultados válidos para provar que o contrato rejeita regressões. Para executar só essa suíte:
+The test also corrupts eight valid outputs to prove that the contract rejects regressions. To run only this suite:
 
 ```sh
 GOWORK=off go test ./internal/schema -count=1 -v
 ```
 
-Essa validação local verifica o contrato da publicação, sem chamar serviços do Google no CI. Após um deploy real, valide as URLs no [Rich Results Test](https://search.google.com/test/rich-results) e no [Schema.org Validator](https://validator.schema.org/). As regras de elegibilidade estão na documentação de [Article](https://developers.google.com/search/docs/appearance/structured-data/article), [ProfilePage](https://developers.google.com/search/docs/appearance/structured-data/profile-page) e [nome do site](https://developers.google.com/search/docs/appearance/site-names).
+This local validation checks the publication contract without calling Google services from CI. After a real deployment, validate the URLs in the [Rich Results Test](https://search.google.com/test/rich-results) and [Schema.org Validator](https://validator.schema.org/). Eligibility rules are documented under [Article](https://developers.google.com/search/docs/appearance/structured-data/article), [ProfilePage](https://developers.google.com/search/docs/appearance/structured-data/profile-page) and [site names](https://developers.google.com/search/docs/appearance/site-names).
 
-## Publicar conteúdo
+## Publish content
 
-Crie `content/blogs/meu-artigo/index.md`:
+Create `content/blogs/my-article/index.md`:
 
 ```toml
 +++
-title = "Título do artigo"
-description = "Um resumo do que o leitor encontrará."
+title = "Article title"
+description = "A summary of what the reader will find."
 authors = ["Seu Nome"]
 publishedAt = "2026-10-29T10:00:00-03:00"
-tags = ["Assunto"]
+tags = ["Topic"]
 draft = true
 +++
 ```
 
-O diretório define `/blogs/meu-artigo/`. Para publicar, revise o texto, informe a data real e altere `draft` para `false`. Use timestamps RFC 3339 com fuso. Datas futuras e rascunhos ficam fora da publicação, incluindo seus assets. Um post futuro precisa de outro build após a data; faça um push ou uma execução manual, pois este template não cria agendamento.
+The directory defines `/blogs/my-article/`. Before publishing, review the text, provide the real publication date and set `draft` to `false`. Use RFC 3339 timestamps with a timezone. Future posts and drafts stay out of the publication, including their assets. A future post needs another build after its publication time; push a commit or trigger a manual run, since this template does not create a schedule.
 
-Imagens do artigo ficam em sua pasta `assets/`. Use `cover = "./assets/capa.png"` e `cover_alt` quando houver uma capa real. O preview global do site não é usado como imagem do artigo no JSON-LD. Séries usam `series` e um `seriesPart` positivo e único.
+Keep article images in the article's `assets/` directory. Set `cover = "./assets/cover.png"` and `cover_alt` when a real cover exists. The global social preview is not used as the article image in JSON-LD. Series use `series` and a positive, unique `seriesPart`.
 
-Autoria, datas, capas, tags, RSS, arquivos e JSON-LD são responsabilidade da Gazeta/Margo. A bio configurada como `ProfilePage` identifica uma pessoa; uma página geral sobre uma equipe pode usar `AboutPage`. O HTML/JavaScript autoral fica desabilitado por padrão em `blog.yaml`.
+Gazeta/Margo own authorship, dates, covers, tags, RSS, archives and JSON-LD. A biography configured as `ProfilePage` identifies one person; a general team page can use `AboutPage`. Authored HTML/JavaScript is disabled by default in `blog.yaml`.
 
-Após o primeiro deploy, confira o domínio, o RSS e o perfil do autor. Valide um artigo e a bio no [Rich Results Test](https://search.google.com/test/rich-results). O teste não garante indexação nem exibição em destaque no Google.
+After the first deployment, check the domain, RSS and author profile. Validate an article and the biography in the [Rich Results Test](https://search.google.com/test/rich-results). Passing does not guarantee indexing or rich-result display on Google.
 
-## Atualizações e rollback
+## Updates and rollback
 
-Atualize a engine em um PR com `go get -tool github.com/araihu/gazeta/cmd/gazeta@VERSAO`, seguido de `go mod tidy` e `make check dry-run`. O workflow e os comandos locais usam a mesma versão fixada. Atualize o Wrangler com versão exata e revise o lockfile no mesmo PR.
+Update the engine in a PR with `go get -tool github.com/araihu/gazeta/cmd/gazeta@VERSION`, followed by `go mod tidy` and `make check dry-run`. The workflow and local commands use the same pinned version. Update Wrangler to an exact version and review the lockfile in the same PR.
 
-Para desfazer uma publicação, reverta o commit e envie um novo commit a `main`. O workflow gera a publicação novamente. Em uma emergência, uma versão anterior também pode ser restaurada em Workers Deployments; alinhe o Git depois para que o próximo deploy não restaure a alteração indesejada.
+To undo a publication, revert the commit and push a new commit to `main`. The workflow rebuilds the publication. In an emergency, you can also restore a previous version through Workers Deployments; then align Git so the next deployment does not restore the unwanted change.
 
-O template tem licença MIT. As dependências mantêm suas próprias licenças.
+## Repository language
+
+Write repository documentation, GoDoc, source-code identifiers, code comments and developer-facing tooling messages in English, including upstream contributions. Blog content, published UI labels and author identities follow the configured locale. The starter blog and intentional localization/Unicode test fixtures use Brazilian Portuguese; preserve those values when they are needed to test localized output.
+
+This template uses the MIT license. Dependencies retain their own licenses.
