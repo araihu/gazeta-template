@@ -154,6 +154,7 @@ type identity struct {
 	Modified                     string
 }
 
+// Portuguese fixture values exercise localized content and Unicode serialization.
 var identities = []identity{
 	{Name: "Notas da Ana", Domain: "https://ana.example", Profile: "/about/", Color: "#306a4b", Authors: []author{{Name: `Ana "A" Silva`, Profile: "/about/"}}},
 	{Name: "Caderno do Bruno", Domain: "https://bruno.example", Profile: "/autores/bruno/", Color: "#864a28", Authors: []author{{Name: "Bruno Costa", Profile: "/autores/bruno/"}, {Name: "Carla Santos", Profile: "https://people.example/carla/"}, {Name: "Pessoa Convidada"}}, Cover: true, Modified: "2026-02-02T10:00:00-03:00"},
