@@ -64,6 +64,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -74,6 +77,10 @@ jobs:
           artifact-ids: ${{ needs.publication.outputs.artifact }}
           merge-multiple: true
           path: .
+      - name: Check downloaded publication without rebuilding
+        env:
+          GOWORK: 'off'
+        run: go tool gazeta check
       - name: Validate downloaded deployment artifact
         env:
           WRANGLER_SEND_METRICS: 'false'
@@ -91,6 +98,7 @@ jobs:
             echo 'A newer main commit exists; this publication is skipped.'
           fi
       - name: Deploy exact publication
+        id: publish
         if: inputs.dry_run != true && steps.current.outputs.publish == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -100,3 +108,15 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Configure CLOUDFLARE_API_TOKEN.' >&2; exit 1; }
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Configure CLOUDFLARE_ACCOUNT_ID.' >&2; exit 1; }
           npx --no-install wrangler deploy --config .build/wrangler.json
+      - name: Verify the public domain against this exact artifact
+        if: steps.publish.outcome == 'success'
+        env:
+          GOWORK: 'off'
+        run: go tool gazeta verify -timeout 3m > .build/production-verification.json
+      - name: Preserve production verification receipt
+        if: always() && steps.publish.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-verification-${{ github.sha }}
+          path: .build/production-verification.json
+          if-no-files-found: warn
