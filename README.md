@@ -1,6 +1,6 @@
 # Gazeta blog template
 
-A Git-managed blog using [Gazeta v0.0.3](https://github.com/araihu/gazeta/releases/tag/v0.0.3), native Margo configuration and Cloudflare Workers Static Assets.
+A Git-managed blog using [Gazeta v0.0.4](https://github.com/araihu/gazeta/releases/tag/v0.0.4), native Margo configuration and Cloudflare Workers Static Assets.
 
 The engine is a Go tool pinned in `go.mod`. This repository contains configuration, sample content, original assets and a small adapter between the site's identity and deployment. There is no engine copy to maintain.
 
@@ -81,6 +81,8 @@ The test also corrupts eight valid outputs to prove that the contract rejects re
 ```sh
 GOWORK=off go test ./internal/schema -count=1 -v
 ```
+
+Gazeta also requires exact sitemap coverage of indexable canonical pages. The generated 404 page uses Margo's native `noindex, follow` metadata and is omitted from the sitemap and `llms.txt`. Aliases retain their redirect targets instead of separate sitemap entries.
 
 This local validation checks the publication contract without calling Google services from CI. After a real deployment, validate the URLs in the [Rich Results Test](https://search.google.com/test/rich-results) and [Schema.org Validator](https://validator.schema.org/). Eligibility rules are documented under [Article](https://developers.google.com/search/docs/appearance/structured-data/article), [ProfilePage](https://developers.google.com/search/docs/appearance/structured-data/profile-page) and [site names](https://developers.google.com/search/docs/appearance/site-names).
 
