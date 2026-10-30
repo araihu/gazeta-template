@@ -1,6 +1,6 @@
 # Gazeta blog template
 
-A Git-managed blog using [Gazeta v0.0.4](https://github.com/araihu/gazeta/releases/tag/v0.0.4), native Margo configuration and Cloudflare Workers Static Assets.
+A Git-managed blog using [Gazeta v0.0.5](https://github.com/araihu/gazeta/releases/tag/v0.0.5), native Margo configuration and Cloudflare Workers Static Assets.
 
 The engine is a Go tool pinned in `go.mod`. This repository contains configuration, sample content, original assets and a small adapter between the site's identity and deployment. There is no engine copy to maintain.
 
@@ -24,7 +24,7 @@ The engine is a Go tool pinned in `go.mod`. This repository contains configurati
 
 Replace `https://blog.example` with your real domain, without a subdirectory. Deployment derives the Custom Domain from that same field, so there is no second domain value to synchronize. Replace `Seu Nome` in the author registry, biography and article frontmatter. Guest authors can have their own profiles and pages.
 
-The theme uses public Margo/Goshtoso tokens. Gazeta supplies the editorial `.blog-*` classes. Changing colors, logos or CSS layout does not require Go changes. Gazeta supports one language per blog. If you change the language, update `locales` and the editorial labels in `blog.yaml`.
+The theme uses public Margo/Goshtoso tokens. Gazeta supplies the editorial `.blog-*` classes. Changing colors, logos or CSS layout does not require Go changes. Gazeta supports locale-scoped publications. Set `locales.default` and `locales.supported` in `site.yaml`. Keep default-language content at the root; use lowercase locale directories such as `content/pt-br/` and `content/es/` for translations. Matching relative paths identify equivalent pages. Add label overrides under `blog.yaml` `locales`, and locale-specific header/footer links with `locale` in `site.yaml`.
 
 ## Configure CI/CD
 
@@ -76,6 +76,8 @@ The suite reads the final HTML, decodes JSON-LD and checks:
 - Publication and modification dates, articles with and without covers, and matching cover URLs in Open Graph/Twitter metadata. Logos and the global preview do not become article or person images.
 - Exactly one JSON-LD block in the head of each regular page, none on the 404 page, and no previous identity in decoded JSON values, including escaped text.
 
+A separate multilingual suite builds English, pt-BR and Spanish institutional identities across successive domains and profile paths. It independently checks self/reciprocal hreflang, the default-language fallback, Organization authors, localized AboutPage data and locale-scoped feeds.
+
 The test also corrupts eight valid outputs to prove that the contract rejects regressions. To run only this suite:
 
 ```sh
@@ -101,11 +103,11 @@ draft = true
 +++
 ```
 
-The directory defines `/blogs/my-article/`. Before publishing, review the text, provide the real publication date and set `draft` to `false`. Use RFC 3339 timestamps with a timezone. Future posts and drafts stay out of the publication, including their assets. A future post needs another build after its publication time; push a commit or trigger a manual run, since this template does not create a schedule.
+The directory defines `/blogs/my-article/`. A translation at `content/es/blogs/my-article/index.md` defines `/es/blogs/my-article/`. Translations keep self-canonical URLs and matching language metadata. Missing, draft and future translations stay out of language links, lists and feeds. Series navigation stays within its locale. Before publishing, review the text, provide the real publication date and set `draft` to `false`. Use RFC 3339 timestamps with a timezone. Future posts and drafts stay out of the publication, including their assets. A future post needs another build after its publication time; push a commit or trigger a manual run, since this template does not create a schedule.
 
 Keep article images in the article's `assets/` directory. Set `cover = "./assets/cover.png"` and `cover_alt` when a real cover exists. The global social preview is not used as the article image in JSON-LD. Series use `series` and a positive, unique `seriesPart`.
 
-Gazeta/Margo own authorship, dates, covers, tags, RSS, archives and JSON-LD. A biography configured as `ProfilePage` identifies one person; a general team page can use `AboutPage`. Authored HTML/JavaScript is disabled by default in `blog.yaml`.
+Gazeta/Margo own authorship, dates, covers, tags, RSS, archives and JSON-LD. A biography configured as `ProfilePage` identifies one person; a general team page uses `AboutPage` and an institutional author declares `type: Organization`. Root-relative author profiles follow each locale prefix; external HTTPS profiles retain their configured destination. Authored HTML/JavaScript is disabled by default in `blog.yaml`.
 
 After the first deployment, check the domain, RSS and author profile. Validate an article and the biography in the [Rich Results Test](https://search.google.com/test/rich-results). Passing does not guarantee indexing or rich-result display on Google.
 

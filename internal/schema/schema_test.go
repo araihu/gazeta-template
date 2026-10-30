@@ -57,14 +57,15 @@ type page struct {
 	Canonical   string
 	Language    string
 	Metadata    map[string][]string
+	Alternates  map[string][]string
 	AuthorLinks []string
 	Published   string
 	Refs        []string
 }
 
 // Read the delivered HTML, independently of Gazeta's schema constructors/checkers.
-func parsePage(data []byte, canonical string, needsSchema bool) (page, error) {
-	p := page{Metadata: map[string][]string{}}
+func parsePage(data []byte, canonical string, needsSchema bool, locales ...string) (page, error) {
+	p := page{Metadata: map[string][]string{}, Alternates: map[string][]string{}}
 	doc, err := html.Parse(strings.NewReader(string(data)))
 	if err != nil {
 		return p, err
@@ -82,6 +83,9 @@ func parsePage(data []byte, canonical string, needsSchema bool) (page, error) {
 			inHead = inHead || n.Data == "head"
 			if n.Data == "html" {
 				p.Language = attrs["lang"]
+			}
+			if n.Data == "link" && attrs["rel"] == "alternate" && attrs["hreflang"] != "" && inHead {
+				p.Alternates[attrs["hreflang"]] = append(p.Alternates[attrs["hreflang"]], attrs["href"])
 			}
 			if n.Data == "link" && attrs["rel"] == "canonical" {
 				canonicalCount++
@@ -123,7 +127,11 @@ func parsePage(data []byte, canonical string, needsSchema bool) (page, error) {
 	if canonicalCount != 1 || p.Canonical != canonical || misplaced {
 		return p, fmt.Errorf("canonical/head differs from published identity: %q", p.Canonical)
 	}
-	if p.Language != "pt-BR" {
+	locale := "pt-BR"
+	if len(locales) > 0 {
+		locale = locales[0]
+	}
+	if p.Language != locale {
 		return p, fmt.Errorf("incorrect HTML language: %s", p.Language)
 	}
 	want := 0
